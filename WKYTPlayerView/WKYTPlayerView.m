@@ -969,7 +969,12 @@ NSString static *const kWKYTPlayerSyndicationRegexPattern = @"^https://tpc.googl
 - (void)stringFromEvaluatingJavaScript:(NSString *)jsToExecute completionHandler:(void (^ __nullable)(NSString * __nullable response, NSError * __nullable error))completionHandler{
     [self.webView evaluateJavaScript:jsToExecute completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
         if (completionHandler) {
-            completionHandler(response, error);
+            if ((response && ![response isKindOfClass:[NSNull class]]) || error) {
+                completionHandler(response, error);
+            } else {
+                NSError *error = [NSError errorWithDomain:@"WKYTPlayerView" code:33 userInfo:@{NSLocalizedDescriptionKey:@"WebView not responding to Javascript. Possibly deallocated in the background."}];
+                completionHandler(response, error);
+            }
         }
     }];
 }
